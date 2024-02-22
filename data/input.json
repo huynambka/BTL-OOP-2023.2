@@ -121,6 +121,72 @@
             }
         }
     },
+    "personalityDistribution": {
+        "description": "Distribution of personality in a pedestrian",
+        "distribution": {
+            "open": {
+                "description": "Open personalities are more optimistic when facing setbacks and will be more active in solving difficulties",
+                "positiveEmotionThreshold": 0.3,
+                "negativeEmotionThreshold": -0.7,
+                "percentage": 20,
+                "lambda": 1
+            },
+            "cautious": {
+                "description": "Cautious personalities tend to be careful and deliberate in their actions, avoiding unnecessary risks",
+                "positiveEmotionThreshold": 0.2,
+                "negativeEmotionThreshold": -0.6,
+                "percentage": 20,
+                "lambda": 2
+            },
+            "extroverted": {
+                "description": "Extroverted personalities are outgoing and sociable, enjoying social interactions and being energized by them",
+                "positiveEmotionThreshold": 0.7,
+                "negativeEmotionThreshold": -0.3,
+                "percentage": 20,
+                "lambda": 0.5
+            },
+            "agreeable": {
+                "description": "Agreeable personalities value cooperation, harmony, and are generally warm and empathetic",
+                "positiveEmotionThreshold": 0.5,
+                "negativeEmotionThreshold": -0.5,
+                "percentage": 20,
+                "lambda": 1.5
+            },
+            "neurotic": {
+                "description": "Neurotic personalities tend to behave negatively in the face of frustration and may experience heightened emotional responses",
+                "positiveEmotionThreshold": 0.6,
+                "negativeEmotionThreshold": -0.4,
+                "percentage": 20,
+                "lambda": 4
+            }
+        },
+        "heuristic": {
+            "positiveEmotionThreshold": 0.8,
+            "negativeEmotionThreshold": -0.8
+        }
+    },
+    "insideTimeDistribution": {
+        "description": "Distribution of inside time of a pedestrian",
+        "distribution": {
+            "uniform": {
+                "description": "Uniform distribution",
+                "value": 10
+            }
+        }
+    },
+    "eventDistribution": {
+        "description": "Distribution of events for all pedestrians",
+        "distribution": {
+            "normal": {
+                "description": "normal distribution",
+                "samples": "43",
+                "numOfValues": 200,
+                "minValue": -1,
+                "maxValue": 1,
+                "numberOfFields": 6
+            }
+        }
+    },
     "TDDegree": {
         "description": "T-Distribution' degree of freedom",
         "value": 15
