@@ -128,35 +128,14 @@
                 "description": "Open personalities are more optimistic when facing setbacks and will be more active in solving difficulties",
                 "positiveEmotionThreshold": 0.3,
                 "negativeEmotionThreshold": -0.7,
-                "percentage": 20,
+                "percentage": 50,
                 "lambda": 1
-            },
-            "cautious": {
-                "description": "Cautious personalities tend to be careful and deliberate in their actions, avoiding unnecessary risks",
-                "positiveEmotionThreshold": 0.2,
-                "negativeEmotionThreshold": -0.6,
-                "percentage": 20,
-                "lambda": 2
-            },
-            "extroverted": {
-                "description": "Extroverted personalities are outgoing and sociable, enjoying social interactions and being energized by them",
-                "positiveEmotionThreshold": 0.7,
-                "negativeEmotionThreshold": -0.3,
-                "percentage": 20,
-                "lambda": 0.5
-            },
-            "agreeable": {
-                "description": "Agreeable personalities value cooperation, harmony, and are generally warm and empathetic",
-                "positiveEmotionThreshold": 0.5,
-                "negativeEmotionThreshold": -0.5,
-                "percentage": 20,
-                "lambda": 1.5
             },
             "neurotic": {
                 "description": "Neurotic personalities tend to behave negatively in the face of frustration and may experience heightened emotional responses",
                 "positiveEmotionThreshold": 0.6,
                 "negativeEmotionThreshold": -0.4,
-                "percentage": 20,
+                "percentage": 50,
                 "lambda": 4
             }
         },
