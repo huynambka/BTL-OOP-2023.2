@@ -11,13 +11,102 @@
 #include <numeric>
 #include <random>
 #include <string>
+#include <sstream>
 #include <vector>
 
 #include "src/constant/Constant.h"
+#include "../pedestrian/Pedestrian.h"
+#include "../personnel/Personnel.h"
+#include "../patient/Patient.h"
+#include "../visitor/Visitor.h"
 
 using namespace std;
 using namespace Constant;
 using namespace Utility;
+
+// generate pedestrian samples based on the number of samples
+std::vector<int> Utility::genSample(int numSamples, int totalValue)
+{
+    std::string command = "python ./genGroupSamples.py --num-samples " +
+                          std::to_string(numSamples) + " --total-value " + std::to_string(totalValue);
+    std::string result = executeCommand(command.c_str());
+
+    std::stringstream ss(result);
+    std::vector<int> samples;
+    int sample;
+    while (ss >> sample)
+    {
+        samples.push_back(sample);
+    }
+    return samples;
+}
+// generate age samples based on the number of samples, minimum age, and maximum age
+std::vector<float> Utility::genAge(int numSamples, int minAge, int maxAge)
+{
+    std::string command = "python ./genAgeSamples.py --num-samples " +
+                          std::to_string(numSamples) + " --lower-bound " +
+                          std::to_string(minAge) + " --upper-bound " + std::to_string(maxAge);
+    std::string result = executeCommand(command.c_str());
+
+    std::stringstream ss(result);
+    std::vector<float> samples;
+    float sample;
+    while (ss >> sample)
+    {
+        samples.push_back(sample);
+    }
+    return samples;
+}
+// execute OS command
+std::string Utility::executeCommand(const char *cmd)
+{
+    char buffer[128];
+    std::string result = "";
+
+    FILE *pipe = popen(cmd, "r");
+    if (!pipe)
+    {
+        throw std::runtime_error("popen() failed!");
+    }
+
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
+    {
+        result += buffer;
+    }
+
+    pclose(pipe);
+
+    return result;
+}
+
+std::vector<Pedestrian> Utility::genPedestrian(std::vector<int> sample)
+{
+    std::vector<Pedestrian> pedes;
+    int index = 0;
+    int numOfPedes = 0;
+    int numOfPersonnel = sample[2];
+    numOfPedes += numOfPersonnel;
+    for (index; index < numOfPersonnel; index++)
+    {
+        Personnel *personnel = new Personnel();
+        pedes.push_back(*personnel);
+    }
+    int numOfPatients = sample[0];
+    numOfPedes += numOfPatients;
+    for (index; index < numOfPatients; index++)
+    {
+        Patient *patient = new Patient();
+        pedes.push_back(*patient);
+    }
+    int numOfVisitors = sample[1];
+    numOfPedes += numOfVisitors;
+    for (index; index < numOfVisitors; index++)
+    {
+        Visitor *visitor = new Visitor();
+        pedes.push_back(*visitor);
+    }
+    return pedes;
+}
 
 // random float number between particular range
 float Utility::randomFloat(float lowerBound, float upperBound)
@@ -220,7 +309,9 @@ void Utility::writeResult(const char *fileName, string name, int mode,
                     output << "Average time to travel through the hallway " << hallwayName
                            << " is " << convertTime((int)avgTime) << "\n"
                            << endl;
-                } else {
+                }
+                else
+                {
                     output << hallwayLength << " " << minValue << " " << maxValue << " " << avgTime << endl;
                 }
 

@@ -7,7 +7,8 @@
 #include <vector>
 #include <algorithm>
 
-class SocialForce {
+class SocialForce
+{
 private:
     std::vector<Agent *> crowd;
     std::vector<Wall *> walls;

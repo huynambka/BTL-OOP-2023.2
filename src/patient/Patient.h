@@ -1,21 +1,17 @@
 #ifndef PATIENT_H
 #define PATIENT_H
 
-#include "../pedestrian/Pedestrian.h"
+#include "src/pedestrian/Pedestrian.h"
+#include "lib/nlohmann/json.hpp"
 
-enum WalkAbility
-{
-    noDisability,
-    crutches,
-    sticks,
-    wheelchairs,
-    blind
-};
-
+using json = nlohmann::json;
 class Patient : public Pedestrian
 {
 protected:
     WalkAbility walkAbility;
+
+public:
+    json toJson();
 };
 
 #endif

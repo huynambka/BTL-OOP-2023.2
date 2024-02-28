@@ -12,6 +12,7 @@ protected:
     double sad;
 
 public:
+    Emotion();
 };
 
 #endif

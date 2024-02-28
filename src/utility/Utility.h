@@ -4,16 +4,26 @@
 #include <vector>
 #include <iostream>
 #include <array>
-#include <lib/nlohmann/json.hpp>
+#include "lib/nlohmann/json.hpp"
 #include "lib/vecmath/vecmath.h"
 #include <map>
 #include "src/agv/AGV.h"
+#include "src/pedestrian/Pedestrian.h"
 
 using json = nlohmann::json;
 
 #pragma once
 namespace Utility
 {
+
+    std::vector<int> genSample(int numSamples, int totalValue);
+
+    std::vector<float> genAge(int numSamples, int minAge, int maxAge);
+
+    std::string executeCommand(const char *cmd);
+
+    std::vector<Pedestrian> genPedestrian(std::vector<int> sample);
+
     float randomFloat(float lowerBound, float upperBound);
 
     std::map<std::string, std::vector<float>> readMapData(const char *fileName);

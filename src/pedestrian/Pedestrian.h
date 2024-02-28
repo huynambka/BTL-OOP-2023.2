@@ -2,12 +2,24 @@
 #define PEDESTRIAN_H
 
 #include <vector>
-#include "../ward/Ward.h"
-#include "../point/Point.h"
-#include "../emotion/Emotion.h"
-#include "../personality/Personality.h"
-#include "../event/Event.h"
-#include "../agv-event/AGVEvent.h"
+#include "src/ward/Ward.h"
+#include "src/point/Point.h"
+#include "src/emotion/Emotion.h"
+#include "src/personality/Personality.h"
+#include "src/event/Event.h"
+#include "src/agv-event/AGVEvent.h"
+#include "lib/nlohmann/json.hpp"
+
+using json = nlohmann::json;
+
+enum WalkAbility
+{
+    noDisability,
+    crutches,
+    sticks,
+    wheelchairs,
+    blind
+};
 
 class Pedestrian
 {
@@ -31,6 +43,8 @@ public:
     ~Pedestrian();
 
     int getId() const { return id; }
+
+    json toJson();
 };
 
 #endif
