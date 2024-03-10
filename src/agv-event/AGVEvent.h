@@ -8,6 +8,11 @@ class AGVEvent : public Event
 protected:
     double impact;
     double time;
+
+public:
+    AGVEvent();
+    ~AGVEvent();
+    json toJson();
 };
 
 #endif

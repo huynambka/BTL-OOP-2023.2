@@ -1,6 +1,8 @@
 #ifndef EMOTION_H
 #define EMOTION_H
 
+#include "lib/nlohmann/json.hpp"
+using json = nlohmann::json;
 class Emotion
 {
 protected:
@@ -13,6 +15,7 @@ protected:
 
 public:
     Emotion();
+    json toJson();
 };
 
 #endif
