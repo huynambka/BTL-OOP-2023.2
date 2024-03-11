@@ -59,8 +59,6 @@ void normalKey(unsigned char key, int xMousePos, int yMousePos);
 
 void update();
 
-void genPedes();
-
 int main(int argc, char **argv)
 {
     inputData = Utility::readInputData("data/input.json");
@@ -134,8 +132,7 @@ int main(int argc, char **argv)
         glutHideWindow();
     }
 
-    init();                   // Initialization
-    genPedes();               // Generate pedestrian data
+    init();                   // Initialization             // Generate pedestrian data
     glutDisplayFunc(display); // Send graphics to display window
     glutReshapeFunc(reshape); // Maintain aspect ratio when window first created,
     // resized and moved
@@ -145,22 +142,6 @@ int main(int argc, char **argv)
     glutMainLoop();       // Enter GLUT's main loop
 
     return 0;
-}
-
-#include <fstream>
-
-void genPedes()
-{
-    std::vector<int> sample = Utility::genSample(3, 100);
-    json output_json;
-    for (const auto &obj : sample)
-    {
-        output_json.push_back(json(obj));
-    }
-
-    std::ofstream file("output.json");
-    file << output_json.dump(4);
-    file.close();
 }
 
 void init()

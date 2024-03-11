@@ -13,6 +13,7 @@ protected:
 
 public:
     Personality();
+    Personality(double lamda, double ne, double pos);
     ~Personality();
     double getLamda() const { return lamda; }
     double getPositiveEmotionThreshold() const { return positiveEmotionThreshold; }

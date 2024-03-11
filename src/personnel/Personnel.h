@@ -9,6 +9,7 @@ class Personnel : public Pedestrian
 {
 protected:
 public:
+    Personnel();
     json toJson();
 };
 

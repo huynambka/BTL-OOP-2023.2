@@ -1,6 +1,11 @@
 #include "Personality.h"
 
-Personality::Personality() {}
+Personality::Personality(double lamda, double ne, double pos)
+{
+    this->lamda = lamda;
+    this->positiveEmotionThreshold = pos;
+    this->negativeEmotionThreshold = ne;
+}
 Personality::~Personality() {}
 
 json Personality::toJson()

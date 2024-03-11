@@ -2,6 +2,7 @@
 
 Pedestrian::Pedestrian()
 {
+    this->id = idCounter++;
 }
 
 Pedestrian::~Pedestrian()

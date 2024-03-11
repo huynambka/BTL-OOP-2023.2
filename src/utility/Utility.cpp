@@ -15,20 +15,23 @@
 #include <vector>
 
 #include "src/constant/Constant.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../personnel/Personnel.h"
-#include "../patient/Patient.h"
-#include "../visitor/Visitor.h"
+#include "src/pedestrian/Pedestrian.h"
+#include "src/personnel/Personnel.h"
+#include "src/patient/Patient.h"
+#include "src/visitor/Visitor.h"
+#include "src/personality/Personality.h"
 
 using namespace std;
 using namespace Constant;
 using namespace Utility;
 
 // generate pedestrian samples based on the number of samples
-std::vector<int> Utility::genSample(int numSamples, int totalValue)
+std::vector<int> Utility::genSample(int numSamples, int totalValue, int upperBound, int lowerBound)
 {
     std::string command = "python ./genGroupSamples.py --num-samples " +
-                          std::to_string(numSamples) + " --total-value " + std::to_string(totalValue);
+                          std::to_string(numSamples) + " --total-value " + std::to_string(totalValue) +
+                          " --upper-bound " + std::to_string(upperBound) +
+                          " --lower-bound " + std::to_string(lowerBound);
     std::string result = executeCommand(command.c_str());
 
     std::stringstream ss(result);
@@ -41,7 +44,7 @@ std::vector<int> Utility::genSample(int numSamples, int totalValue)
     return samples;
 }
 // generate age samples based on the number of samples, minimum age, and maximum age
-std::vector<float> Utility::genAge(int numSamples, int minAge, int maxAge)
+std::vector<double> Utility::genAge(int numSamples, int minAge, int maxAge)
 {
     std::string command = "python ./genAgeSamples.py --num-samples " +
                           std::to_string(numSamples) + " --lower-bound " +
@@ -49,8 +52,8 @@ std::vector<float> Utility::genAge(int numSamples, int minAge, int maxAge)
     std::string result = executeCommand(command.c_str());
 
     std::stringstream ss(result);
-    std::vector<float> samples;
-    float sample;
+    std::vector<double> samples;
+    double sample;
     while (ss >> sample)
     {
         samples.push_back(sample);
@@ -79,35 +82,100 @@ std::string Utility::executeCommand(const char *cmd)
     return result;
 }
 
-std::vector<Pedestrian> Utility::genPedestrian(std::vector<int> sample)
+std::vector<Pedestrian> Utility::genRandomData()
 {
     std::vector<Pedestrian> pedes;
-    int index = 0;
-    int numOfPedes = 0;
-    int numOfPersonnel = sample[2];
-    numOfPedes += numOfPersonnel;
-    for (index; index < numOfPersonnel; index++)
-    {
-        Personnel *personnel = new Personnel();
-        pedes.push_back(*personnel);
-    }
-    int numOfPatients = sample[0];
-    numOfPedes += numOfPatients;
-    for (index; index < numOfPatients; index++)
-    {
-        Patient *patient = new Patient();
-        pedes.push_back(*patient);
-    }
-    int numOfVisitors = sample[1];
-    numOfPedes += numOfVisitors;
-    for (index; index < numOfVisitors; index++)
-    {
-        Visitor *visitor = new Visitor();
-        pedes.push_back(*visitor);
-    }
-    return pedes;
-}
+    int maxNumOfPedes = 30000;                                                  // TODO: Read from input file
+    std::vector<int> pedesDistribution = genSample(2, maxNumOfPedes, 12000, 0); // Sinh ra mảng 3 số nguyên ngẫu nhiên, lần lượt là số lượng Personel, Patient, Visitor
+    int total = pedesDistribution[0] + pedesDistribution[1] + pedesDistribution[2];
+    std::vector<int> pvWalkAbility = genSample(5, pedesDistribution[1] + pedesDistribution[2], 10000, 0); // Tạo mảng chứa phân phối walk ability của Patient và Visitor
 
+    // Percent of open personality equal negative personality (50%)
+    int openPersonalityPercent = 50; // TODO: Read from input file
+    int numOfOpenPersonality = total * openPersonalityPercent / 100;
+    double openLamda = 1;
+    double openNeThreshold = -0.7;
+    double openPosThreshold = 0.3;
+
+    double negativeLamda = 4;
+    double negativeNeThreshold = -0.4;
+    double negativePosThreshold = 0.6;
+
+    std::vector<double>
+        ageDistribution = genAge(total, 2, 100); // Tạo mảng chứa phân phối tuổi của Personel, Patient và Visitor
+
+    // TODO: Tạo các đối tượng Ward từ file, khởi tạo các thuộc tính, tạo 1 mảng các Wards cố định
+    // sau đó set Ward cho các đối tượng Pedestrian
+    // Không sử dụng class Ward vì nếu mỗi Pedestrian có 1 Ward thì sẽ tạo ra nhiều Ward trùng lặp
+
+    int index = 0;
+    // Tạo mảng chứa thông tin của Personel
+    for (int i = 0; i < pedesDistribution[0]; i++)
+    {
+        Personnel personnel;
+        personnel.setWalkAbility(WalkAbility::noDisability);
+        personnel.setVelocity(V1);
+        int randomInt = Utility::randomInt(1, 10);
+        if (randomInt % 2 && numOfOpenPersonality != 0) // Random nếu số chẵn thì là người có tính cách open
+        {
+            personnel.setPersonality(Personality(openLamda, openNeThreshold, openPosThreshold));
+            numOfOpenPersonality--;
+        }
+        else
+        {
+            personnel.setPersonality(Personality(negativeLamda, negativeNeThreshold, negativePosThreshold));
+            pedes.push_back(personnel);
+            index++;
+        }
+        personnel.setAge((ageDistribution[index] > 22) ? ageDistribution[index] : 22); // Nhân viên tối thiểu 22 tuổi
+        pedes.push_back(personnel);
+        index++;
+    }
+    // Tọa mảng thông tin người bệnh
+    for (int i = 0; i < pedesDistribution[1]; i++)
+    {
+        Patient patient;
+        patient.setWalkAbility(WalkAbility::wheelchairs);
+        patient.setVelocity(V5);
+        int randomInt = Utility::randomInt(1, 10);
+        if (randomInt % 2 && numOfOpenPersonality != 0) // Random nếu số chẵn thì là người có tính cách open
+        {
+            patient.setPersonality(Personality(openLamda, openNeThreshold, openPosThreshold));
+            numOfOpenPersonality--;
+            patient.setAge(ageDistribution[index]);
+        }
+        else
+        {
+            patient.setPersonality(Personality(negativeLamda, negativeNeThreshold, negativePosThreshold));
+            patient.setAge((ageDistribution[index] > 11) ? ageDistribution[index] : ageDistribution[index] + 10); // Đảm bảo không có người nào dưới 11 tuổi có tính cách neurotic
+        }
+        pedes.push_back(patient);
+        index++;
+    }
+    // Tạo mảng thông tin của người thăm bệnh
+    for (int i = 0; i < pedesDistribution[1]; i++)
+    {
+        Visitor visitor;
+        visitor.setWalkAbility(WalkAbility::wheelchairs);
+        visitor.setVelocity(V5); //
+        int randomInt = Utility::randomInt(1, 10);
+        if (randomInt % 2 && numOfOpenPersonality != 0) // Random nếu số chẵn thì là người có tính cách open
+        {
+            visitor.setPersonality(Personality(openLamda, openNeThreshold, openPosThreshold));
+            numOfOpenPersonality--;
+            visitor.setAge(ageDistribution[index]);
+        }
+        else
+        {
+            visitor.setPersonality(Personality(negativeLamda, negativeNeThreshold, negativePosThreshold));
+            visitor.setAge((ageDistribution[index] > 11) ? ageDistribution[index] : ageDistribution[index] + 10); // Đảm bảo không có người nào dưới 11 tuổi có tính cách neurotic
+        }
+        pedes.push_back(visitor);
+        index++;
+    }
+
+    // Tạo các Event cho mỗi Pedestrian
+}
 // random float number between particular range
 float Utility::randomFloat(float lowerBound, float upperBound)
 {

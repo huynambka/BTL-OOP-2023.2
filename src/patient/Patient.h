@@ -8,8 +8,6 @@ using json = nlohmann::json;
 class Patient : public Pedestrian
 {
 protected:
-    WalkAbility walkAbility;
-
 public:
     json toJson();
 };

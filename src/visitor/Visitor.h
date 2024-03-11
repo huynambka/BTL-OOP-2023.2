@@ -9,8 +9,6 @@ using json = nlohmann::json;
 class Visitor : public Pedestrian
 {
 protected:
-    WalkAbility walkAbility;
-
 public:
     json toJson();
 };

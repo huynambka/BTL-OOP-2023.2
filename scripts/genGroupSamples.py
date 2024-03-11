@@ -31,6 +31,7 @@ def generateSamples(num_samples, total_value, lower_bound, upper_bound):
 
     # Hoán đổi phần tử lớn nhất với phần tử đầu tiên
     values[0], values[max_idx] = values[max_idx], values[0]
+    values.sort()
     print(values)
 
 

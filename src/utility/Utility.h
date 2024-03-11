@@ -16,13 +16,13 @@ using json = nlohmann::json;
 namespace Utility
 {
 
-    std::vector<int> genSample(int numSamples, int totalValue);
+    std::vector<int> genSample(int numSamples, int totalValue, int upperBound, int lowerBound);
 
-    std::vector<float> genAge(int numSamples, int minAge, int maxAge);
+    std::vector<double> genAge(int numSamples, int minAge, int maxAge);
 
     std::string executeCommand(const char *cmd);
 
-    std::vector<Pedestrian> genPedestrian(std::vector<int> sample);
+    std::vector<Pedestrian> genRandomData();
 
     float randomFloat(float lowerBound, float upperBound);
 

@@ -9,6 +9,7 @@ using json = nlohmann::json;
 class Ward
 {
 protected:
+    char name;
     Point entrance;
     Point exit;
     std::vector<Point> wall;
