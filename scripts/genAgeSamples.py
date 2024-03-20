@@ -33,8 +33,8 @@ def generateSamples(n, k, min_value, max_value):
     stat, p_value = stats.kstest(sample, 'norm', args=(mean, std))
 
     # In ra giá trị p_value
-    print("Giá trị p_value là: ")
-    print(p_value)
+    # print("Giá trị p_value là: ")
+    # print(p_value)
 
     # Đặt mức ý nghĩa thống kê (significance level) là 0.05
     # Nếu giá trị p_value nhỏ hơn mức ý nghĩa thống kê, ta bác bỏ giả thuyết không và kết luận mẫu dữ liệu không tuân theo phân bố chuẩn
@@ -44,19 +44,20 @@ def generateSamples(n, k, min_value, max_value):
     # Đặt giới hạn hiển thị của NumPy thành None để in ra toàn bộ mẫu dữ liệu
     np.set_printoptions(threshold=None)
 
-    if p_value < alpha:
-        print("Mẫu dữ liệu không tuân theo phân bố chuẩn")
-    else:
-        print("Mẫu dữ liệu tuân theo phân bố chuẩn")
-        # In ra mẫu dữ liệu
-        print("Mẫu dữ liệu tuân theo phân bố chuẩn là: ")
-        print(sample)
+    print(sample)
+    # if p_value < alpha:
+    #     print("Mẫu dữ liệu không tuân theo phân bố chuẩn")
+    # else:
+    #     print("Mẫu dữ liệu tuân theo phân bố chuẩn")
+    #     # In ra mẫu dữ liệu
+    #     print("Mẫu dữ liệu tuân theo phân bố chuẩn là: ")
+    #     print(sample)
 
-        print("Gia tri cuc tieu la: ")
-        print(np.min(sample))
+    #     print("Gia tri cuc tieu la: ")
+    #     print(np.min(sample))
 
-        print("Gia tri cuc dai la: ")
-        print(np.max(sample))
+    #     print("Gia tri cuc dai la: ")
+    #     print(np.max(sample))
 
 
 if __name__ == "__main__":

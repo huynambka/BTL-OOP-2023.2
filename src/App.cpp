@@ -6,7 +6,6 @@
 
 #include <random>
 #include <lib/nlohmann/json.hpp>
-#include <fstream>
 
 #include "model/SocialForce.h"
 #include "constant/Constant.h"
@@ -41,6 +40,8 @@ std::vector<int> numOfPeople;
 float minSpeed = -1;
 float maxSpeed = -1;
 int threshold = 0;
+
+int Pedestrian::idCounter = 0;
 
 // Function Prototypes
 void init();
@@ -132,7 +133,9 @@ int main(int argc, char **argv)
         glutHideWindow();
     }
 
-    init();                   // Initialization             // Generate pedestrian data
+    init(); // Initialization
+
+    Utility::genRandomData(inputData);
     glutDisplayFunc(display); // Send graphics to display window
     glutReshapeFunc(reshape); // Maintain aspect ratio when window first created,
     // resized and moved

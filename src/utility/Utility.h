@@ -22,7 +22,9 @@ namespace Utility
 
     std::string executeCommand(const char *cmd);
 
-    std::vector<Pedestrian> genRandomData();
+    void writeToFile(Pedestrian *pede, const char *fileName);
+
+    void genRandomData(json inputData);
 
     float randomFloat(float lowerBound, float upperBound);
 

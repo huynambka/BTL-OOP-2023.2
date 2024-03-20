@@ -11,6 +11,8 @@ protected:
 
 public:
     Event();
+    void setIntensity(double intensity) { this->intensity = intensity; };
+    void setTime(int time) { this->time = time; };
     json toJson();
 };
 

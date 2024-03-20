@@ -1,5 +1,9 @@
 #include "Personality.h"
 
+Personality::Personality()
+{
+}
+
 Personality::Personality(double lamda, double ne, double pos)
 {
     this->lamda = lamda;

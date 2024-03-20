@@ -2,7 +2,7 @@
 
 Pedestrian::Pedestrian()
 {
-    this->id = idCounter++;
+    this->id = Pedestrian::idCounter++;
 }
 
 Pedestrian::~Pedestrian()
@@ -37,4 +37,5 @@ json Pedestrian::toJson()
     {
         jsonObj["tempPoints"].push_back(point.toJson());
     }
+    return jsonObj;
 }

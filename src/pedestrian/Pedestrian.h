@@ -1,6 +1,7 @@
 #ifndef PEDESTRIAN_H
 #define PEDESTRIAN_H
 
+#include <iostream>
 #include <vector>
 // #include "src/ward/Ward.h"
 #include "src/point/Point.h"
@@ -23,10 +24,13 @@ enum WalkAbility
 
 struct Ward
 {
-    char name;
+    std::string name;
     Point entrance;
     Point exit;
     std::vector<Point> wall;
+    void setName(std::string name) { this->name = name; }
+    void setEntrance(Point entrance) { this->entrance = entrance; }
+    void setExit(Point exit) { this->exit = exit; }
     json toJson()
     {
         json jsonObj;
@@ -54,7 +58,8 @@ protected:
     double velocity;
     Personality personality;
     Emotion emotion;
-    std::vector<Event> events;
+    std::vector<Event *> events;
+    std::vector<float> eventTimeDistances;
     double walkingTime;
     double distance;
     double age;
@@ -66,10 +71,12 @@ public:
     Pedestrian();
     ~Pedestrian();
     void setAge(float age) { this->age = age; }
-    double setVelocity(double velocity) { this->velocity = velocity; }
+    void setVelocity(double velocity) { this->velocity = velocity; }
     int getId() const { return id; }
     void setWalkAbility(WalkAbility walkAbility) { this->walkAbility = walkAbility; }
     void setPersonality(Personality personality) { this->personality = personality; }
+    void setEvents(std::vector<Event *> events) { this->events = events; }
+    void setEventTimeDistances(std::vector<float> eventTimeDistances) { this->eventTimeDistances = eventTimeDistances; }
     json toJson();
 };
 

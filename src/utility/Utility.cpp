@@ -13,6 +13,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <string>
 
 #include "src/constant/Constant.h"
 #include "src/pedestrian/Pedestrian.h"
@@ -20,6 +21,11 @@
 #include "src/patient/Patient.h"
 #include "src/visitor/Visitor.h"
 #include "src/personality/Personality.h"
+#include "src/point/Point.h"
+
+#include "lib/nlohmann/json.hpp"
+
+using json = nlohmann::json;
 
 using namespace std;
 using namespace Constant;
@@ -28,35 +34,43 @@ using namespace Utility;
 // generate pedestrian samples based on the number of samples
 std::vector<int> Utility::genSample(int numSamples, int totalValue, int upperBound, int lowerBound)
 {
-    std::string command = "python ./genGroupSamples.py --num-samples " +
+    std::string command = "python ./scripts/genGroupSamples.py --num-samples " +
                           std::to_string(numSamples) + " --total-value " + std::to_string(totalValue) +
                           " --upper-bound " + std::to_string(upperBound) +
                           " --lower-bound " + std::to_string(lowerBound);
     std::string result = executeCommand(command.c_str());
-
+    result.erase(0, 1);
+    result.pop_back();
     std::stringstream ss(result);
     std::vector<int> samples;
     int sample;
+
     while (ss >> sample)
     {
         samples.push_back(sample);
+        ss.ignore(); // Bỏ qua dấu phẩy
     }
     return samples;
 }
 // generate age samples based on the number of samples, minimum age, and maximum age
 std::vector<double> Utility::genAge(int numSamples, int minAge, int maxAge)
 {
-    std::string command = "python ./genAgeSamples.py --num-samples " +
+    std::string command = "python ./scripts/genAgeSamples.py --num-samples " +
                           std::to_string(numSamples) + " --lower-bound " +
                           std::to_string(minAge) + " --upper-bound " + std::to_string(maxAge);
     std::string result = executeCommand(command.c_str());
 
+    result.erase(0, 1);
+    result.pop_back();
+
     std::stringstream ss(result);
     std::vector<double> samples;
+
     double sample;
     while (ss >> sample)
     {
         samples.push_back(sample);
+        ss.ignore(); // Bỏ qua dấu phẩy
     }
     return samples;
 }
@@ -81,101 +95,172 @@ std::string Utility::executeCommand(const char *cmd)
 
     return result;
 }
-
-std::vector<Pedestrian> Utility::genRandomData()
+void Utility::writeToFile(Pedestrian *pede, const char *fileName)
 {
-    std::vector<Pedestrian> pedes;
+    std::ofstream output(fileName, std::ios::app);
+    output << pede->toJson() << std::endl;
+    output.close();
+}
+void Utility::genRandomData(json inputData) // TODO: Sửa cái hàm culon này cho gọn lại
+{
     int maxNumOfPedes = 30000;                                                  // TODO: Read from input file
-    std::vector<int> pedesDistribution = genSample(2, maxNumOfPedes, 12000, 0); // Sinh ra mảng 3 số nguyên ngẫu nhiên, lần lượt là số lượng Personel, Patient, Visitor
+    std::vector<int> pedesDistribution = genSample(3, maxNumOfPedes, 12000, 0); // Sinh ra mảng 3 số nguyên ngẫu nhiên, lần lượt là số lượng Personel, Patient, Visitor
     int total = pedesDistribution[0] + pedesDistribution[1] + pedesDistribution[2];
     std::vector<int> pvWalkAbility = genSample(5, pedesDistribution[1] + pedesDistribution[2], 10000, 0); // Tạo mảng chứa phân phối walk ability của Patient và Visitor
-
     // Percent of open personality equal negative personality (50%)
-    int openPersonalityPercent = 50; // TODO: Read from input file
-    int numOfOpenPersonality = total * openPersonalityPercent / 100;
-    double openLamda = 1;
-    double openNeThreshold = -0.7;
-    double openPosThreshold = 0.3;
 
-    double negativeLamda = 4;
-    double negativeNeThreshold = -0.4;
-    double negativePosThreshold = 0.6;
+    int openPersonalityPercent = (int)inputData["personalityDistribution"]["distribution"]["open"]["percentage"];
+
+    int numOfOpenPersonality = total * openPersonalityPercent / 100;
+    float openLambda = (float)inputData["personalityDistribution"]["distribution"]["open"]["lambda"];
+    float openNeThreshold = (float)inputData["personalityDistribution"]["distribution"]["open"]["negativeEmotionThreshold"];
+    float openPosThreshold = (float)inputData["personalityDistribution"]["distribution"]["open"]["positiveEmotionThreshold"];
+
+    float neuroticLambda = (float)inputData["personalityDistribution"]["distribution"]["neurotic"]["lambda"];
+    float neuroticNeThreshold = (float)inputData["personalityDistribution"]["distribution"]["neurotic"]["negativeEmotionThreshold"];
+    float neuroticPosThreshold = (float)inputData["personalityDistribution"]["distribution"]["neurotic"]["positiveEmotionThreshold"];
 
     std::vector<double>
         ageDistribution = genAge(total, 2, 100); // Tạo mảng chứa phân phối tuổi của Personel, Patient và Visitor
-
     // TODO: Tạo các đối tượng Ward từ file, khởi tạo các thuộc tính, tạo 1 mảng các Wards cố định
     // sau đó set Ward cho các đối tượng Pedestrian
     // Không sử dụng class Ward vì nếu mỗi Pedestrian có 1 Ward thì sẽ tạo ra nhiều Ward trùng lặp
 
+    /*
+    int totalWards = (int)inputData["wardDistribution"]["distribution"].size() - 1;
+    std::vector<Ward> wards;
+    for (auto &element : inputData["wardDistribution"]["distribution"].items())
+    {
+        // std::cout << element.key() << ": " << element.value() << std::endl;
+        Ward ward;
+        ward.setName(element.key());
+        ward.setEntrance(Point(0, 0)); // TODO: read point from hospital.txt
+        ward.setExit(Point(0, 0));
+    }
+    */
+    // Tạo danh sách các events
+    std::vector<Event *> allEvents;
+    for (int i = 0; i < 30; i++)
+    {
+        Event *event = new Event();
+        event->setIntensity(Utility::randomFloat(0, 1));
+        event->setTime(Utility::randomInt(0, 10));
+        allEvents.push_back(event);
+    }
+    std::vector<float> allTimeDistances;
+    for (int i = 0; i < 30; i++)
+    {
+        allTimeDistances.push_back(Utility::randomFloat(0, 100));
+    }
     int index = 0;
     // Tạo mảng chứa thông tin của Personel
     for (int i = 0; i < pedesDistribution[0]; i++)
     {
-        Personnel personnel;
-        personnel.setWalkAbility(WalkAbility::noDisability);
-        personnel.setVelocity(V1);
+        Pedestrian *personnel = new Personnel();
+        personnel->setWalkAbility(WalkAbility::noDisability);
+        personnel->setVelocity(V1);
         int randomInt = Utility::randomInt(1, 10);
         if (randomInt % 2 && numOfOpenPersonality != 0) // Random nếu số chẵn thì là người có tính cách open
         {
-            personnel.setPersonality(Personality(openLamda, openNeThreshold, openPosThreshold));
+
+            personnel->setPersonality(Personality(openLambda, openNeThreshold, openPosThreshold));
             numOfOpenPersonality--;
         }
         else
         {
-            personnel.setPersonality(Personality(negativeLamda, negativeNeThreshold, negativePosThreshold));
-            pedes.push_back(personnel);
+
+            personnel->setPersonality(Personality(neuroticLambda, neuroticNeThreshold, neuroticPosThreshold));
             index++;
         }
-        personnel.setAge((ageDistribution[index] > 22) ? ageDistribution[index] : 22); // Nhân viên tối thiểu 22 tuổi
-        pedes.push_back(personnel);
-        index++;
+
+        personnel->setAge((ageDistribution[index] > 22) ? ageDistribution[index] : 22); // Nhân viên tối thiểu 22 tuổi
+        std::vector<Event *> pedeEvents;
+        for (int i = 0; i < 20; i++)
+        {
+            pedeEvents.push_back(allEvents[Utility::randomInt(0, 29)]);
+        }
+        personnel->setEvents(pedeEvents);
+        std::vector<float> pedeTimeDistances;
+        for (int i = 0; i < 19; i++)
+        {
+            pedeTimeDistances.push_back(allTimeDistances[Utility::randomInt(0, 29)]);
+        }
+        personnel->setEventTimeDistances(pedeTimeDistances);
+
+        Utility::writeToFile(personnel, "pedes.txt");
+        delete personnel;
     }
+
     // Tọa mảng thông tin người bệnh
     for (int i = 0; i < pedesDistribution[1]; i++)
     {
-        Patient patient;
-        patient.setWalkAbility(WalkAbility::wheelchairs);
-        patient.setVelocity(V5);
+        Pedestrian *patient = new Patient();
+        patient->setWalkAbility(WalkAbility::wheelchairs);
+        patient->setVelocity(V5);
         int randomInt = Utility::randomInt(1, 10);
         if (randomInt % 2 && numOfOpenPersonality != 0) // Random nếu số chẵn thì là người có tính cách open
         {
-            patient.setPersonality(Personality(openLamda, openNeThreshold, openPosThreshold));
+            patient->setPersonality(Personality(openLambda, openNeThreshold, openPosThreshold));
             numOfOpenPersonality--;
-            patient.setAge(ageDistribution[index]);
+            patient->setAge(ageDistribution[index]);
         }
         else
         {
-            patient.setPersonality(Personality(negativeLamda, negativeNeThreshold, negativePosThreshold));
-            patient.setAge((ageDistribution[index] > 11) ? ageDistribution[index] : ageDistribution[index] + 10); // Đảm bảo không có người nào dưới 11 tuổi có tính cách neurotic
+            patient->setPersonality(Personality(neuroticLambda, neuroticNeThreshold, neuroticPosThreshold));
+            patient->setAge((ageDistribution[index] > 11) ? ageDistribution[index] : ageDistribution[index] + 10); // Đảm bảo không có người nào dưới 11 tuổi có tính cách neurotic
         }
-        pedes.push_back(patient);
-        index++;
+        std::vector<Event *> pedeEvents;
+        for (int i = 0; i < 20; i++)
+        {
+            pedeEvents.push_back(allEvents[Utility::randomInt(0, 29)]);
+        }
+        patient->setEvents(pedeEvents);
+        std::vector<float> pedeTimeDistances;
+        for (int i = 0; i < 19; i++)
+        {
+            pedeTimeDistances.push_back(allTimeDistances[Utility::randomInt(0, 29)]);
+        }
+        patient->setEventTimeDistances(pedeTimeDistances);
+
+        Utility::writeToFile(patient, "pedes.txt");
+        delete patient;
     }
     // Tạo mảng thông tin của người thăm bệnh
     for (int i = 0; i < pedesDistribution[1]; i++)
     {
-        Visitor visitor;
-        visitor.setWalkAbility(WalkAbility::wheelchairs);
-        visitor.setVelocity(V5); //
+        Pedestrian *visitor = new Visitor();
+        visitor->setWalkAbility(WalkAbility::wheelchairs);
+        visitor->setVelocity(V5); //
         int randomInt = Utility::randomInt(1, 10);
         if (randomInt % 2 && numOfOpenPersonality != 0) // Random nếu số chẵn thì là người có tính cách open
         {
-            visitor.setPersonality(Personality(openLamda, openNeThreshold, openPosThreshold));
+            visitor->setPersonality(Personality(openLambda, openNeThreshold, openPosThreshold));
             numOfOpenPersonality--;
-            visitor.setAge(ageDistribution[index]);
+            visitor->setAge(ageDistribution[index]);
         }
         else
         {
-            visitor.setPersonality(Personality(negativeLamda, negativeNeThreshold, negativePosThreshold));
-            visitor.setAge((ageDistribution[index] > 11) ? ageDistribution[index] : ageDistribution[index] + 10); // Đảm bảo không có người nào dưới 11 tuổi có tính cách neurotic
+            visitor->setPersonality(Personality(neuroticLambda, neuroticNeThreshold, neuroticPosThreshold));
+            visitor->setAge((ageDistribution[index] > 11) ? ageDistribution[index] : ageDistribution[index] + 10); // Đảm bảo không có người nào dưới 11 tuổi có tính cách neurotic
         }
-        pedes.push_back(visitor);
-        index++;
-    }
+        std::vector<Event *> pedeEvents;
+        for (int i = 0; i < 20; i++)
+        {
+            pedeEvents.push_back(allEvents[Utility::randomInt(0, 29)]);
+        }
+        visitor->setEvents(pedeEvents);
+        std::vector<float> pedeTimeDistances;
+        for (int i = 0; i < 19; i++)
+        {
+            pedeTimeDistances.push_back(allTimeDistances[Utility::randomInt(0, 29)]);
+        }
+        visitor->setEventTimeDistances(pedeTimeDistances);
 
-    // Tạo các Event cho mỗi Pedestrian
+        Utility::writeToFile(visitor, "pedes.txt");
+        delete visitor;
+    }
 }
+
 // random float number between particular range
 float Utility::randomFloat(float lowerBound, float upperBound)
 {
