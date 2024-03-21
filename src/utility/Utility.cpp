@@ -14,6 +14,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include "src/constant/Constant.h"
 #include "src/pedestrian/Pedestrian.h"
@@ -78,6 +79,7 @@ void Utility::genRandomData(json inputData) // TODO: Sửa cái hàm culon này 
 {
     int maxNumOfPedes = 100;                                                                // TODO: Read from input file
     std::vector<int> pedesDistribution = Utility::genRandomIntArray(3, 30000, 7500, 12000); // Sinh ra mảng 3 số nguyên ngẫu nhiên, lần lượt là số lượng Personel, Patient, Visitor
+    std::sort(pedesDistribution.begin(), pedesDistribution.end());
     int total = pedesDistribution[0] + pedesDistribution[1] + pedesDistribution[2];
     std::vector<int> pvWalkAbility = Utility::genRandomIntArray(5, pedesDistribution[1] + pedesDistribution[2], 0, 10000); // Tạo mảng chứa phân phối walk ability của Patient và Visitor
     // Percent of open personality equal negative personality (50%)
@@ -200,7 +202,7 @@ void Utility::genRandomData(json inputData) // TODO: Sửa cái hàm culon này 
         delete patient;
     }
     // Tạo mảng thông tin của người thăm bệnh
-    for (int i = 0; i < pedesDistribution[1]; i++)
+    for (int i = 0; i < pedesDistribution[2]; i++)
     {
         Pedestrian *visitor = new Visitor();
         visitor->setWalkAbility(WalkAbility::wheelchairs);
