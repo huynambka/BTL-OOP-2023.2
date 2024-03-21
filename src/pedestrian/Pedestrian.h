@@ -60,8 +60,8 @@ protected:
     Emotion emotion;
     std::vector<Event *> events;
     std::vector<float> eventTimeDistances;
-    double walkingTime;
-    double distance;
+    // double walkingTime;
+    // double distance;
     double age;
     AGVEvent impactOfAGV;
     std::vector<Point> tempPoints;

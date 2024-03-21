@@ -1,5 +1,5 @@
 #include "Pedestrian.h"
-
+#include <cmath>
 Pedestrian::Pedestrian()
 {
     this->id = Pedestrian::idCounter++;
@@ -20,16 +20,16 @@ json Pedestrian::toJson()
     {
         jsonObj["journey"].push_back(ward.toJson());
     }
-    jsonObj["velocity"] = this->velocity;
+    jsonObj["velocity"] = round(this->velocity * 100) / 100;
     jsonObj["personality"] = this->personality.toJson();
     jsonObj["emotion"] = this->emotion.toJson();
     jsonObj["events"] = json::array();
-    for (auto &event : this->events)
+    for (Event *event : this->events)
     {
-        jsonObj["events"].push_back(event.toJson());
+        jsonObj["events"].push_back(event->toJson());
     }
-    jsonObj["walkingTime"] = this->walkingTime;
-    jsonObj["distance"] = this->distance;
+    // jsonObj["walkingTime"] = this->walkingTime;
+    // jsonObj["distance"] = this->distance;
     jsonObj["age"] = this->age;
     jsonObj["impactOfAGV"] = this->impactOfAGV.toJson();
     jsonObj["tempPoints"] = json::array();

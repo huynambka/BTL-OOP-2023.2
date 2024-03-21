@@ -16,11 +16,7 @@ using json = nlohmann::json;
 namespace Utility
 {
 
-    std::vector<int> genSample(int numSamples, int totalValue, int upperBound, int lowerBound);
-
-    std::vector<double> genAge(int numSamples, int minAge, int maxAge);
-
-    std::string executeCommand(const char *cmd);
+    std::vector<int> genRandomIntArray(int n, int total, int min, int max);
 
     void writeToFile(Pedestrian *pede, const char *fileName);
 

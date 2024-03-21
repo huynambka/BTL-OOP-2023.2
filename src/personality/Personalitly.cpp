@@ -1,5 +1,5 @@
 #include "Personality.h"
-
+#include <cmath>
 Personality::Personality()
 {
 }
@@ -16,7 +16,7 @@ json Personality::toJson()
 {
     json jsonObj;
     jsonObj["lamda"] = this->lamda;
-    jsonObj["positiveEmotionThreshold"] = this->positiveEmotionThreshold;
-    jsonObj["negativeEmotionThreshold"] = this->negativeEmotionThreshold;
+    jsonObj["positiveEmotionThreshold"] = round(this->positiveEmotionThreshold * 10) / 10;
+    jsonObj["negativeEmotionThreshold"] = round(this->negativeEmotionThreshold * 10) / 10;
     return jsonObj;
 }

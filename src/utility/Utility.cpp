@@ -31,70 +31,43 @@ using namespace std;
 using namespace Constant;
 using namespace Utility;
 
-// generate pedestrian samples based on the number of samples
-std::vector<int> Utility::genSample(int numSamples, int totalValue, int upperBound, int lowerBound)
+vector<int> Utility::genRandomIntArray(int n, int total, int min, int max)
 {
-    std::string command = "python ./scripts/genGroupSamples.py --num-samples " +
-                          std::to_string(numSamples) + " --total-value " + std::to_string(totalValue) +
-                          " --upper-bound " + std::to_string(upperBound) +
-                          " --lower-bound " + std::to_string(lowerBound);
-    std::string result = executeCommand(command.c_str());
-    result.erase(0, 1);
-    result.pop_back();
-    std::stringstream ss(result);
-    std::vector<int> samples;
-    int sample;
 
-    while (ss >> sample)
+    // Define a random number generator engine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Define a normal distribution with mean 0 and standard deviation 1
+    // std::normal_distribution<double> normal_dist(mean, deviation);
+    std::uniform_int_distribution<int> uniform_dist(min, max);
+    // Generate random numbers following the normal distribution
+    std::vector<int> numbers;
+    for (int i = 0; i < n; ++i)
     {
-        samples.push_back(sample);
-        ss.ignore(); // Bỏ qua dấu phẩy
+        double rand_num = uniform_dist(gen); // Generate a random number
+        numbers.push_back(rand_num);         // Convert to integer and store
     }
-    return samples;
+
+    // Adjust the numbers to ensure their sum equals m
+    // If the total is -1, then the sum of the numbers is not adjusted
+    if (total != -1)
+    {
+        // Calculate the current sum of the generated numbers
+        int current_sum = 0;
+        for (int num : numbers)
+        {
+            current_sum += num;
+        }
+        for (int &num : numbers)
+        {
+            num += (total - current_sum) / n; // Adjust each number by the required amount
+        }
+    }
+
+    return numbers;
 }
-// generate age samples based on the number of samples, minimum age, and maximum age
-std::vector<double> Utility::genAge(int numSamples, int minAge, int maxAge)
-{
-    std::string command = "python ./scripts/genAgeSamples.py --num-samples " +
-                          std::to_string(numSamples) + " --lower-bound " +
-                          std::to_string(minAge) + " --upper-bound " + std::to_string(maxAge);
-    std::string result = executeCommand(command.c_str());
 
-    result.erase(0, 1);
-    result.pop_back();
-
-    std::stringstream ss(result);
-    std::vector<double> samples;
-
-    double sample;
-    while (ss >> sample)
-    {
-        samples.push_back(sample);
-        ss.ignore(); // Bỏ qua dấu phẩy
-    }
-    return samples;
-}
-// execute OS command
-std::string Utility::executeCommand(const char *cmd)
-{
-    char buffer[128];
-    std::string result = "";
-
-    FILE *pipe = popen(cmd, "r");
-    if (!pipe)
-    {
-        throw std::runtime_error("popen() failed!");
-    }
-
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
-    {
-        result += buffer;
-    }
-
-    pclose(pipe);
-
-    return result;
-}
 void Utility::writeToFile(Pedestrian *pede, const char *fileName)
 {
     std::ofstream output(fileName, std::ios::app);
@@ -103,10 +76,10 @@ void Utility::writeToFile(Pedestrian *pede, const char *fileName)
 }
 void Utility::genRandomData(json inputData) // TODO: Sửa cái hàm culon này cho gọn lại
 {
-    int maxNumOfPedes = 30000;                                                  // TODO: Read from input file
-    std::vector<int> pedesDistribution = genSample(3, maxNumOfPedes, 12000, 0); // Sinh ra mảng 3 số nguyên ngẫu nhiên, lần lượt là số lượng Personel, Patient, Visitor
+    int maxNumOfPedes = 100;                                                                // TODO: Read from input file
+    std::vector<int> pedesDistribution = Utility::genRandomIntArray(3, 30000, 7500, 12000); // Sinh ra mảng 3 số nguyên ngẫu nhiên, lần lượt là số lượng Personel, Patient, Visitor
     int total = pedesDistribution[0] + pedesDistribution[1] + pedesDistribution[2];
-    std::vector<int> pvWalkAbility = genSample(5, pedesDistribution[1] + pedesDistribution[2], 10000, 0); // Tạo mảng chứa phân phối walk ability của Patient và Visitor
+    std::vector<int> pvWalkAbility = Utility::genRandomIntArray(5, pedesDistribution[1] + pedesDistribution[2], 0, 10000); // Tạo mảng chứa phân phối walk ability của Patient và Visitor
     // Percent of open personality equal negative personality (50%)
 
     int openPersonalityPercent = (int)inputData["personalityDistribution"]["distribution"]["open"]["percentage"];
@@ -120,8 +93,9 @@ void Utility::genRandomData(json inputData) // TODO: Sửa cái hàm culon này 
     float neuroticNeThreshold = (float)inputData["personalityDistribution"]["distribution"]["neurotic"]["negativeEmotionThreshold"];
     float neuroticPosThreshold = (float)inputData["personalityDistribution"]["distribution"]["neurotic"]["positiveEmotionThreshold"];
 
-    std::vector<double>
-        ageDistribution = genAge(total, 2, 100); // Tạo mảng chứa phân phối tuổi của Personel, Patient và Visitor
+    std::vector<int>
+        ageDistribution = Utility::genRandomIntArray(total, -1, 5, 100); // Tạo mảng chứa phân phối tuổi của Personel, Patient và Visitor
+
     // TODO: Tạo các đối tượng Ward từ file, khởi tạo các thuộc tính, tạo 1 mảng các Wards cố định
     // sau đó set Ward cho các đối tượng Pedestrian
     // Không sử dụng class Ward vì nếu mỗi Pedestrian có 1 Ward thì sẽ tạo ra nhiều Ward trùng lặp
